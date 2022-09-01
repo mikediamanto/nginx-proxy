@@ -292,7 +292,14 @@ server {
 		proxy_set_header X-Real-IP $remote_addr;
 	}
 
-	location ~* ^\/(media|dbmedia|pamedia|(casino-games/sprite))\/(.*) {
+	location ~* ^\/(media|dbmedia|pamedia)\/(.*) {
+		proxy_pass http://{{ $backend }};
+		proxy_set_header Host {{ $backend }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+		proxy_set_header X-Real-IP $remote_addr;
+	}
+
+	location ~* ^\/casino-games/sprite$ {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
