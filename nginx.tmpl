@@ -278,7 +278,7 @@ server {
 
   {{ if ne $backend "test.local"}}
 
-	location ~* ^\/api\/betsearch\/(.*) {
+  	location ~* ^\/betsearch\/(.*) {
 		proxy_pass http://{{ $backend }}/betsearch/$1/$is_args$args;
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
@@ -345,14 +345,14 @@ server {
 		proxy_set_header X-Real-IP $remote_addr;
 	}
 
-  location ~* ^\/(el/|en/|de/|fi/)?Sports/(GetPerformLiveStreamingInfo|GetSportradarLiveStreamingInfo|GetBetgeniusLiveStreamingInfo|GetRMGLiveStreamingInfo|GetIMGLiveStreamingInfo)(.*) {
+  location ~* ^\/(el/|es/|en/|de/|fi/)?Sports/(GetPerformLiveStreamingInfo|GetSportradarLiveStreamingInfo|GetBetgeniusLiveStreamingInfo|GetRMGLiveStreamingInfo|GetIMGLiveStreamingInfo)(.*) {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Real-IP $remote_addr;
 	}
  
-  location ~* ^\/(el/|en/|de/|fi/)?UserAccount/(GetDepositPageModel|GetIbanCodes|DepositFrame|DoWithdraw|GetPendingWithdraws|GetWithdrawPageModelFull|UpdateFunds|SetDepositTNC)(.*) {             
+  location ~* ^\/(el/|es/|en/|de/|fi/)?UserAccount/(GetDepositPageModel|GetIbanCodes|DepositFrame|DoWithdraw|GetPendingWithdraws|GetWithdrawPageModelFull|UpdateFunds|SetDepositTNC)(.*) {             
 		proxy_pass http://{{ $backend }};
                 proxy_set_header Host {{ $backend }};
                 proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
