@@ -278,8 +278,8 @@ server {
 
   {{ if ne $backend "test.local"}}
 
-  	location ~* ^\/betsearch\/(.*) {
-		proxy_pass http://{{ $backend }}/betsearch/$1/$is_args$args;
+	location ~* ^\/betsearch\/(.*) {
+		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Real-IP $remote_addr;
@@ -345,13 +345,12 @@ server {
 		proxy_set_header X-Real-IP $remote_addr;
 	}
 
-  location ~* ^\/(el/|es/|en/|de/|fi/)?Sports/(GetPerformLiveStreamingInfo|GetSportradarLiveStreamingInfo|GetBetgeniusLiveStreamingInfo|GetRMGLiveStreamingInfo|GetIMGLiveStreamingInfo)(.*) {
+  location ~* ^\/(el/|en/|de/|fi/|es/)?Sports/(GetPerformLiveStreamingInfo|GetSportradarLiveStreamingInfo|GetBetgeniusLiveStreamingInfo|GetRMGLiveStreamingInfo|GetIMGLiveStreamingInfo)(.*) {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Real-IP $remote_addr;
 	}
- 
   {{ end }}
 }
 {{ end }}
