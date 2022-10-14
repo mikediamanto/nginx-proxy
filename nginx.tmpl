@@ -352,14 +352,6 @@ server {
 		proxy_set_header X-Real-IP $remote_addr;
 	}
  
-  location ~* ^\/(el/|es/|en/|de/|fi/)?UserAccount/(GetDepositPageModel|GetIbanCodes|DepositFrame|DoWithdraw|GetPendingWithdraws|GetWithdrawPageModelFull|UpdateFunds|SetDepositTNC)(.*) {             
-		proxy_pass http://{{ $backend }};
-                proxy_set_header Host {{ $backend }};
-                proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-                proxy_set_header X-Real-IP $remote_addr;
-        }
-
- 
   {{ end }}
 }
 {{ end }}
