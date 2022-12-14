@@ -109,7 +109,7 @@ proxy_set_header Host $http_host;
 proxy_set_header Upgrade $http_upgrade;
 proxy_set_header Connection $proxy_connection;
 proxy_set_header X-Real-IP $remote_addr;
-proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
 proxy_set_header X-Forwarded-Ssl $proxy_x_forwarded_ssl;
 proxy_set_header X-Forwarded-Port $proxy_x_forwarded_port;
@@ -193,6 +193,7 @@ upstream {{ $upstream_name }} {
 
 {{ $backend := trim (or (first (groupByKeys $containers "Env.VIRTUAL_BACKEND")) "test.local") }}
 {{ $forwarded_host := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_HOST")) "novi-gr.dev-app-01.local") }}
+{{ $forwarded_for := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_FOR")) "45.66.185.234") }}
 
 {{/* Get the SERVER_TOKENS defined by containers w/ the same vhost, falling back to "" */}}
 {{ $server_tokens := trim (or (first (groupByKeys $containers "Env.SERVER_TOKENS")) "") }}
@@ -278,52 +279,72 @@ server {
 
   {{ if ne $backend "test.local"}}
 
+	location ~* ^\/vbl\/(.*) {
+		proxy_pass http://vblnovibet.aitcloud.de/$1/$is_args$args;
+	}
+
+	location ~* ^\/vhk\/(.*) {
+		proxy_pass http://vsknovibet.aitcloud.de/$1/$is_args$args;
+	}
+
+	location ~* ^\/vfnc\/(.*) {
+		proxy_pass http://vfnovibet.aitcloud.de/$1/$is_args$args;
+	}
+
+	location ~* ^\/vflm\/(.*) {
+		proxy_pass http://vfnovibet.aitcloud.de/$1/$is_args$args;
+	}
+
+	location ~* ^\/vti\/(.*) {
+		proxy_pass http://vtinovibet.aitcloud.de/$1/$is_args$args;
+	}
+
 	location ~* ^\/betsearch\/(.*) {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For $remote_addr;
-		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location ~* ^\/api\/(marketviews|navigation)\/(.*) {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For $remote_addr;
-		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location ~* ^\/(media|dbmedia|pamedia)\/(.*) {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For $remote_addr;
-		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location ~* ^\/casino-games/sprite$ {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For $remote_addr;
-		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location ~* ^\/api\/(.*) {
 		proxy_pass http://{{ $backend }}/$1/$is_args$args;
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For $remote_addr;
-		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 	
 	location ~* ^\/ngapi\/(.*) {
 		proxy_pass http://{{ $backend }}/ngapi/$1$is_args$args;
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For $remote_addr;
-		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
 		proxy_set_header NGApi NGApi;
     }
 
@@ -331,8 +352,8 @@ server {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For $remote_addr;
-		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
         proxy_http_version 1.1;
@@ -342,24 +363,25 @@ server {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For $remote_addr;
-		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
   location ~* ^\/(bundles|Scripts|Content|content|fonts)\/(.*) {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For $remote_addr;
-		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
   location ~* ^\/(el/|en/|de/|fi/|es/)?Sports/(GetPerformLiveStreamingInfo|GetSportradarLiveStreamingInfo|GetBetgeniusLiveStreamingInfo|GetRMGLiveStreamingInfo|GetIMGLiveStreamingInfo)(.*) {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For $remote_addr;
-		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
+		proxy_set_header NGApi NGApi;
 	}
   {{ end }}
 }
