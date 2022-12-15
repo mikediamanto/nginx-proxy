@@ -14,5 +14,6 @@ services:
   whoami:
     image: jwilder/whoami
     environment:
-      - VIRTUAL_HOST=localhost
-      - VIRTUAL_FORWARDED_FOR=78.87.114.71
+      - VIRTUAL_HOST=novi2015.local
+      - VIRTUAL_FORWARDED_FOR=45.66.185.234
+      - VIRTUAL_BACKEND=web-novibet-desktop-gr.prd-novibet.systems

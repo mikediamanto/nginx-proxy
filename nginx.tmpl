@@ -87,7 +87,7 @@ gzip_types text/plain text/css application/javascript application/json applicati
 log_format vhost '$host $remote_addr - $remote_user [$time_local] '
                  '"$request" $status $body_bytes_sent '
                  '"$http_referer" "$http_user_agent" '
-                 '"$upstream_addr"';
+                 '"$upstream_addr"' '"$proxy_host"' ;
 
 access_log off;
 
@@ -279,26 +279,46 @@ server {
 
   {{ if ne $backend "test.local"}}
 
+	location ~* ^\/vflm\/(.*) {
+		proxy_pass http://{{ $backend }};
+		proxy_set_header Host {{ $backend }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
+	}
+
 	location ~* ^\/vbl\/(.*) {
-		proxy_pass http://vblnovibet.aitcloud.de/$1/$is_args$args;
+		proxy_pass http://{{ $backend }};
+		proxy_set_header Host {{ $backend }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location ~* ^\/vhk\/(.*) {
-		proxy_pass http://vsknovibet.aitcloud.de/$1/$is_args$args;
+		proxy_pass http://{{ $backend }};
+		proxy_set_header Host {{ $backend }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location ~* ^\/vfnc\/(.*) {
-		proxy_pass http://vfnovibet.aitcloud.de/$1/$is_args$args;
-	}
-
-	location ~* ^\/vflm\/(.*) {
-		proxy_pass http://vfnovibet.aitcloud.de/$1/$is_args$args;
+		proxy_pass http://{{ $backend }};
+		proxy_set_header Host {{ $backend }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location ~* ^\/vti\/(.*) {
-		proxy_pass http://vtinovibet.aitcloud.de/$1/$is_args$args;
+		proxy_pass http://{{ $backend }};
+		proxy_set_header Host {{ $backend }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
-
+	
 	location ~* ^\/betsearch\/(.*) {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
