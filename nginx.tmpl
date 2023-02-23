@@ -358,6 +358,12 @@ server {
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
+
+	location ~* ^\/mrk\/(.*) {
+		proxy_pass http://services-marketinggateway.devgr-novibet.systems/mrk/$1/$is_args$args;
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
+	}
 	
 	location ~* ^\/ngapi\/(.*) {
 		proxy_pass http://{{ $backend }}/ngapi/$1$is_args$args;
