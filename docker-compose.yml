@@ -1,19 +1,7 @@
 version: '2'
 services:
   nginx-proxy:
-    build: 
-      context: .
-      dockerfile: Dockerfile.alpine
-    image: custom/nginx-proxy
+    image: bluebrown-web/novi-proxy:latest
     container_name: nginx-proxy
-    ports:
-      - "4000:80"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
-
-  whoami:
-    image: jwilder/whoami
-    environment:
-      - VIRTUAL_HOST=novi2015.local
-      - VIRTUAL_FORWARDED_FOR=45.66.185.234
-      - VIRTUAL_BACKEND=web-novibet-desktop-gr.prd-novibet.systems
