@@ -345,14 +345,6 @@ server {
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
-	location ~* ^\/casino-games/sprite$ {
-		proxy_pass http://{{ $backend }};
-		proxy_set_header Host {{ $backend }};
-		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-	}
-
 	location ~* ^\/api\/(.*) {
 		proxy_pass http://{{ $backend }}/$1/$is_args$args;
 		proxy_set_header Host {{ $backend }};
@@ -406,29 +398,12 @@ server {
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
     }
 
-  location ~* ^\/(el/|en/|fi/|de/)?(casino/ProviderPlugin)(.*) {
+  	location ~* ^\/(el/|en/|fi/|de/)?(casino/ProviderPlugin)(.*) {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
-	}
-
-  location ~* ^\/(bundles|Scripts|Content|content|fonts)\/(.*) {
-		proxy_pass http://{{ $backend }};
-		proxy_set_header Host {{ $backend }};
-		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-	}
-
-  location ~* ^\/(el/|en/|de/|fi/|es/)?Sports/(GetPerformLiveStreamingInfo|GetSportradarLiveStreamingInfo|GetBetgeniusLiveStreamingInfo|GetRMGLiveStreamingInfo|GetIMGLiveStreamingInfo)(.*) {
-		proxy_pass http://{{ $backend }};
-		proxy_set_header Host {{ $backend }};
-		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-		proxy_set_header NGApi NGApi;
 	}
   {{ end }}
 }
