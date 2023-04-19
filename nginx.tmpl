@@ -193,7 +193,7 @@ upstream {{ $upstream_name }} {
 
 {{ $backend := trim (or (first (groupByKeys $containers "Env.VIRTUAL_BACKEND")) "test.local") }}
 {{ $mrk_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) "services-marketinggateway.prd-novibet.systems") }}
-{{ $spt_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) "web-sportsbookfeed-plv.prd-novibet.systems") }}
+{{ $spt_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) "web-sportsbookfeed.devgr-novibet.systems") }}
 {{ $forwarded_host := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_HOST")) "novi-gr.dev-app-01.local") }}
 {{ $forwarded_for := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_FOR")) "45.66.185.234") }}
 
