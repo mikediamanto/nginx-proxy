@@ -368,7 +368,7 @@ server {
 	}
 	
 	location ~* ^\/ngapi\/(.*) {
-		proxy_pass http://{{ $backend }}/$1$is_args$args;
+		proxy_pass http://{{ $backend }}/ngapi/$1$is_args$args;
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
