@@ -367,7 +367,7 @@ server {
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 	
-	location ~* ^\/ngapi\/(.*)\/casino-api/casino$ {
+	location ~* ^\/ngapi\/(.*)\/casino-api|casino-games\/(.*)$ {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
