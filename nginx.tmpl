@@ -331,14 +331,6 @@ server {
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
-
-	location ~* ^\/api\/(marketviews|navigation)\/(.*) {
-		proxy_pass http://{{ $backend }};
-		proxy_set_header Host {{ $backend }};
-		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-	}
 	
 	location ~* ^\/betsearch\/(.*) {
 		proxy_pass http://{{ $backend }};
