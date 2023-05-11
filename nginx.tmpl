@@ -348,16 +348,8 @@ server {
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
-	location ~* ^\/(media|dbmedia|pamedia)\/(.*) {
+	location ~* ^\/(media|dbmedia|pamedia|mediaimages)\/(.*) {
 		proxy_pass http://{{ $backend }};
-		proxy_set_header Host {{ $backend }};
-		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-	}
-
-	location ~* ^\/api\/(.*) {
-		proxy_pass http://{{ $backend }}/$1/$is_args$args;
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
