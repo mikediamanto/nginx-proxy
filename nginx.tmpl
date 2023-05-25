@@ -200,6 +200,7 @@ upstream {{ $upstream_name }} {
 {{ $isDesktop := hasPrefix "web-novibet-desktop" $backend}}
 {{ $mrk_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) "services-marketinggateway.prd-novibet.systems") }}
 {{ $spt_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) "web-sportsbookfeed.devgr-novibet.systems") }}
+{{ $casinogames_service :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINOGAMES_SERVICE")) "services-casinogames.stg-novibet.systems") }}
 {{ $forwarded_host := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_HOST")) "novi-gr.dev-app-01.local") }}
 {{ $forwarded_for := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_FOR")) "45.66.185.234") }}
 
@@ -340,12 +341,16 @@ server {
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
-	location ~* ^\/(media|dbmedia|pamedia|mediaimages)\/(.*) {
+	location ~* ^\/(media|dbmedia|pamedia)\/(.*) {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
+	}
+
+	location /mediaimages {
+		proxy_pass http://{{ $casinogames_service }};
 	}
 
 	location ~* ^\/mrk\/(.*) {
