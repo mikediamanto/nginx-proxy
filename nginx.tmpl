@@ -293,46 +293,6 @@ server {
 
   {{ if ne $backend "test.local"}}
 
-	location ~* ^\/vflm\/(.*) {
-		proxy_pass http://{{ $backend }};
-		proxy_set_header Host {{ $backend }};
-		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-	}
-
-	location ~* ^\/vbl\/(.*) {
-		proxy_pass http://{{ $backend }};
-		proxy_set_header Host {{ $backend }};
-		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-	}
-
-	location ~* ^\/vhk\/(.*) {
-		proxy_pass http://{{ $backend }};
-		proxy_set_header Host {{ $backend }};
-		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-	}
-
-	location ~* ^\/vfnc\/(.*) {
-		proxy_pass http://{{ $backend }};
-		proxy_set_header Host {{ $backend }};
-		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-	}
-
-	location ~* ^\/vti\/(.*) {
-		proxy_pass http://{{ $backend }};
-		proxy_set_header Host {{ $backend }};
-		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-	}
-	
 	location ~* ^\/betsearch\/(.*) {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
@@ -349,8 +309,12 @@ server {
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
-	location /mediaimages {
+	location ~* ^\/(mediaimages)\/(.*) {
 		proxy_pass http://{{ $casinogames_service }};
+		proxy_set_header Host {{ $casinogames_service }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location ~* ^\/mrk\/(.*) {
