@@ -309,7 +309,7 @@ server {
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
-	location ~* ^\/(mediaimages)\/(.*) {
+	location /mediaimages {
 		proxy_pass http://{{ $casinogames_service }};
 		proxy_set_header Host {{ $casinogames_service }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
