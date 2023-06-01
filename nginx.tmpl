@@ -240,6 +240,12 @@ upstream {{ $upstream_name }} {
 
 
 server {
+	listen 80 default_server;
+	server_name _;
+	return 404; # "Connection closed without response"
+}
+
+server {
 	server_name {{ $host }};
 	{{ if $server_tokens }}
 	server_tokens {{ $server_tokens }};
