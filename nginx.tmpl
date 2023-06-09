@@ -323,6 +323,24 @@ server {
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 	
+	location ~* ^\/ngapi\/mobile\/(.*) {
+		proxy_pass http://web-novibet-mobile-angularapi-gr.prd-novibet.systems/$1$is_args$args;
+		proxy_set_header Host web-novibet-mobile-angularapi-gr.prd-novibet.systems;
+		proxy_set_header X-Forwarded-Host m.novibet.gr;
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
+		proxy_set_header NGApi NGApi;
+    }
+
+	location ~* ^\/ngapi\/desktop\/(.*) {
+		proxy_pass http://web-novibet-desktop-gr.prd-novibet.systems/$1$is_args$args;
+		proxy_set_header Host web-novibet-desktop-gr.prd-novibet.systems;
+		proxy_set_header X-Forwarded-Host www.novibet.gr;
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
+		proxy_set_header NGApi NGApi;
+    }
+
 	location ~* ^\/ngapi\/(.*) {
 		proxy_pass http://{{ $backend }}/$1$is_args$args;
 		proxy_set_header Host {{ $backend }};
