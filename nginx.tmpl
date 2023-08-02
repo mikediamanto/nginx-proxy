@@ -200,6 +200,7 @@ upstream {{ $upstream_name }} {
 {{ $isDesktop := hasPrefix "web-novibet-desktop" $backend}}
 {{ $mrk_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) "services-marketinggateway.prd-novibet.systems") }}
 {{ $spt_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) "web-sportsbookfeed.devgr-novibet.systems") }}
+{{ $spt_api :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_API")) "web-sportsbookgateway.prd-novibet.systems") }}
 {{ $casinogames_service :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINOGAMES_SERVICE")) "services-casinogames.stg-novibet.systems") }}
 {{ $forwarded_host := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_HOST")) "novi-gr.dev-app-01.local") }}
 {{ $forwarded_for := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_FOR")) "45.66.185.234") }}
@@ -375,6 +376,14 @@ server {
 	location /spt/feed {
 		proxy_pass http://{{ $spt_gateway }};
 		proxy_set_header Host {{ $spt_gateway }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
+    }
+
+	location /spt/api {
+		proxy_pass http://{{ $spt_api }};
+		proxy_set_header Host {{ $spt_api }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
