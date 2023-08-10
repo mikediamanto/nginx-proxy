@@ -326,7 +326,7 @@ server {
 	}
 	
 	location ~* ^\/ngapi\/mobile\/(.*) {
-		proxy_pass http://web-novibet-mobile-angularapi-gr.prd-novibet.systems/$1$is_args$args;
+		proxy_pass http://web-novibet-mobile-api-ec.devgr-novibet.systems/$1$is_args$args;
 		proxy_set_header Host web-novibet-mobile-angularapi-gr.prd-novibet.systems;
 		proxy_set_header X-Forwarded-Host m.novibet.gr;
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
@@ -335,13 +335,35 @@ server {
     }
 
 	location ~* ^\/ngapi\/desktop\/(.*) {
-		proxy_pass http://web-novibet-desktop-gr.prd-novibet.systems/$1$is_args$args;
+		proxy_pass http://web-novibet-desktop-api-gr.devgr-novibet.systems/$1$is_args$args;
 		proxy_set_header Host web-novibet-desktop-gr.prd-novibet.systems;
 		proxy_set_header X-Forwarded-Host www.novibet.gr;
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 		proxy_set_header NGApi NGApi;
     }
+
+	location /signalr/desktop {
+		proxy_pass http://web-novibet-desktop-api-gr.devgr-novibet.systems;
+		proxy_set_header Host {{ $backend }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_http_version 1.1;
+	}
+
+	location /signalr/mobile {
+		proxy_pass http://web-novibet-mobile-api-gr.devgr-novibet.systems;
+		proxy_set_header Host {{ $backend }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_http_version 1.1;
+	}
 
 	location ~* ^\/ngapi\/(.*) {
 		proxy_pass http://{{ $backend }}/$1$is_args$args;
