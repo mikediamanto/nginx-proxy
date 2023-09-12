@@ -202,6 +202,7 @@ upstream {{ $upstream_name }} {
 {{ $spt_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) "web-sportsbookfeed.devgr-novibet.systems") }}
 {{ $spt_api :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_API")) "web-sportsbookgateway.prd-novibet.systems") }}
 {{ $casinogames_service :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINOGAMES_SERVICE")) "services-casinogames.stg-novibet.systems") }}
+{{ $casinosearch :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINO_SEARCH")) "services-casinogamessearch.stg-novibet.systems") }}
 {{ $forwarded_host := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_HOST")) "novi-gr.dev-app-01.local") }}
 {{ $forwarded_for := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_FOR")) "45.66.185.234") }}
 
@@ -296,8 +297,16 @@ server {
   {{ if ne $backend "test.local"}}
 
 	location ~* ^\/betsearch/api/search/CT_(.*)_CasinoMobile {
-		proxy_pass http://services-casinogamessearch.stg-novibet.systems/api/search/MOBILE/$1/$is_args$args;
-		proxy_set_header Host services-casinogamessearch.stg-novibet.systems;
+		proxy_pass http://{{ $casinosearch }}/api/search/MOBILE/$1/$is_args$args;
+		proxy_set_header Host {{ $casinosearch }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
+	}
+
+	location ~* ^\/betsearch/api/search/CT_(.*)_casino {
+		proxy_pass http://{{ $casinosearch }}/api/search/DESKTOP/$1/$is_args$args;
+		proxy_set_header Host {{ $casinosearch }};
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
