@@ -295,6 +295,14 @@ server {
 
   {{ if ne $backend "test.local"}}
 
+	location ~* ^\/betsearch/api/search/CT_(.*)_CasinoMobile {
+		proxy_pass http://services-casinogamessearch.stg-novibet.systems/api/search/MOBILE/$1/$is_args$args;
+		proxy_set_header Host services-casinogamessearch.stg-novibet.systems;
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
+	}
+
 	location ~* ^\/betsearch\/(.*) {
 		proxy_pass http://{{ $backend }};
 		proxy_set_header Host {{ $backend }};
