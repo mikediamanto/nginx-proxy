@@ -196,13 +196,30 @@ upstream {{ $upstream_name }} {
 {{/* Get the VIRTUAL_PROTO defined by containers w/ the same vhost, falling back to "http" */}}
 {{ $proto := trim (or (first (groupByKeys $containers "Env.VIRTUAL_PROTO")) "http") }}
 
+{{ $env := trim (or (first (groupByKeys $containers "Env.VIRTUAL_BACKEND")) "prd") }}
+
+{{ if (eq $env "prd") }}	
+	{{ $mrk_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) "services-marketinggateway.prd-novibet.systems") }}
+	{{ $spt_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) "web-sportsbookfeed.prd-novibet.systems") }}
+	{{ $spt_api :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_API")) "web-sportsbookgateway.prd-novibet.systems") }}
+	{{ $casinogames_service :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINOGAMES_SERVICE")) "services-casinogames.prd-novibet.systems") }}
+	{{ $casinosearch :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINO_SEARCH")) "services-casinogamessearch.prd-novibet.systems") }}
+{{ else if (eq $env "stg") }}
+	{{ $mrk_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) "services-marketinggateway.stg-novibet.systems") }}
+	{{ $spt_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) "web-sportsbookfeed.stg-novibet.systems") }}
+	{{ $spt_api :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_API")) "web-sportsbookgateway.stg-novibet.systems") }}
+	{{ $casinogames_service :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINOGAMES_SERVICE")) "services-casinogames.stg-novibet.systems") }}
+	{{ $casinosearch :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINO_SEARCH")) "services-casinogamessearch.stg-novibet.systems") }}
+{{ else }}
+	{{ $mrk_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) "services-marketinggateway.devgr-novibet.systems") }}
+	{{ $spt_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) "web-sportsbookfeed.devgr-novibet.systems") }}
+	{{ $spt_api :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_API")) "web-sportsbookgateway.devgr-novibet.systems") }}
+	{{ $casinogames_service :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINOGAMES_SERVICE")) "services-casinogames.devgr-novibet.systems") }}
+	{{ $casinosearch :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINO_SEARCH")) "services-casinogamessearch.devgr-novibet.systems") }}
+{{ end }}
+
 {{ $backend := trim (or (first (groupByKeys $containers "Env.VIRTUAL_BACKEND")) "test.local") }}
 {{ $isDesktop := hasPrefix "web-novibet-desktop" $backend}}
-{{ $mrk_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) "services-marketinggateway.prd-novibet.systems") }}
-{{ $spt_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) "web-sportsbookfeed.devgr-novibet.systems") }}
-{{ $spt_api :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_API")) "web-sportsbookgateway.prd-novibet.systems") }}
-{{ $casinogames_service :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINOGAMES_SERVICE")) "services-casinogames.stg-novibet.systems") }}
-{{ $casinosearch :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINO_SEARCH")) "services-casinogamessearch.stg-novibet.systems") }}
 {{ $forwarded_host := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_HOST")) "novi-gr.dev-app-01.local") }}
 {{ $forwarded_for := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_FOR")) "45.66.185.234") }}
 
