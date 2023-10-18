@@ -338,6 +338,13 @@ server {
 		add_header  X-Upstream-Mrk-Gateway   http://{{ $mrk_gateway }}/;
 		add_header  X-Upstream-Casino-Search   http://{{ $casinosearch }}/;
 		add_header  X-Upstream-Casino-Games   http://{{ $casinogames_service }}/;
+
+		{{ if eq (index $oneDomain $domain) "false" }}
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host_mobile }};
+		{{else}}
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+		{{end}}
+		
 		proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
 		{{ end }}
 		{{ if (exists (printf "/etc/nginx/htpasswd/%s" $host)) }}
