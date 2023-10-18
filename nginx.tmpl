@@ -231,6 +231,18 @@ upstream {{ $upstream_name }} {
 {{ $forwarded_host := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_HOST")) "novi-gr.dev-app-01.local") }}
 {{ $forwarded_for := index $countryIps $domain}}
 
+
+{{ $legacy_desktop := trim (or (first (groupByKeys $containers "Env.VIRTUAL_LEGACY_DESKTOP"))  ( printf "web-novibet-desktop-api-%s.%s-novibet.systems" $domain $environment)) }}
+{{ $legacy_mobile := trim (or (first (groupByKeys $containers "Env.VIRTUAL_LEGACY_MOBILE"))  ( printf "web-novibet-mobile-api-%s.%s-novibet.systems" $domain $environment)) }}
+{{ $backend := trim (or (first (groupByKeys $containers "Env.VIRTUAL_BACKEND"))  ( printf "web-novibet-desktop-api-%s.%s-novibet.systems" $domain $environment)) }}
+{{ $mrk_gateway := trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) ( printf "services-marketinggateway.%s-novibet.systems" $environment)) }}
+{{ $spt_gateway := trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) ( printf "web-sportsbookfeed.%s-novibet.systems" $environment)) }}
+{{ $spt_api :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_API")) ( printf "web-sportsbookgateway.%s-novibet.systems" $environment)) }}
+{{ $casinogames_service :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINOGAMES_SERVICE")) (printf "services-casinogames.%s-novibet.systems" $environment)) }}
+{{ $casinosearch :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINO_SEARCH")) (printf "services-casinogamessearch.%s-novibet.systems" $environment)) }}
+{{ $forwarded_host := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_HOST")) (printf "www%s.novibet.%s" $domainKey $domain)) }}
+{{ $spt_search := trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_SEARCH")) (printf "services-betcontextsearch.%s-novibet.systems" $environment)) }}
+
 {{/* Get the SERVER_TOKENS defined by containers w/ the same vhost, falling back to "" */}}
 {{ $server_tokens := trim (or (first (groupByKeys $containers "Env.SERVER_TOKENS")) "") }}
 
@@ -300,7 +312,16 @@ server {
 		grpc_pass {{ trim $proto }}://{{ trim $upstream_name }};
 		{{ else }}
 		add_header  X-Upstream-Environment   {{ $environment }};
-		add_header  X-Upstream-IP   {{ index $countryIps "gr" }};
+		add_header  X-Upstream-IP   {{ $forwarded_for }};
+		add_header  X-Upstream-Host   {{ $forwarded_host }};
+		add_header  X-Upstream-Default   http://{{ $backend }}/;
+		add_header  X-Upstream-Legacy-Desktop   http://{{ $legacy_desktop }}/;
+		add_header  X-Upstream-Legacy-Mobile   http://{{ $legacy_mobile }}/;
+		add_header  X-Upstream-Spt-Gateway   http://{{ $spt_gateway }}/;
+		add_header  X-Upstream-Spt-API   http://{{ $spt_api }}/;
+		add_header  X-Upstream-Mrk-Gateway   http://{{ $mrk_gateway }}/;
+		add_header  X-Upstream-Casino-Search   http://{{ $casinosearch }}/;
+		add_header  X-Upstream-Casino-Games   http://{{ $casinogames_service }}/;
 		proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
 		{{ end }}
 		{{ if (exists (printf "/etc/nginx/htpasswd/%s" $host)) }}
@@ -317,77 +338,73 @@ server {
   {{ if eq $hasProxy "true"}}
 
 	location ~* ^\/betsearch/api/search/CT_(.*)_CasinoMobile {
-		proxy_pass http://services-casinogamessearch.{{ $environment }}-novibet.systems/api/search/MOBILE/$1/$is_args$args;
-		proxy_set_header Host services-casinogamessearch.{{ $environment }}-novibet.systems;
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
+		proxy_pass http://{{ $casinosearch }}/api/search/MOBILE/$1/$is_args$args;
+		proxy_set_header Host {{ $casinosearch }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location ~* ^\/betsearch/api/search/CT_(.*)_casino {
-		proxy_pass http://services-casinogamessearch.{{ $environment }}-novibet.systems/api/search/DESKTOP/$1/$is_args$args;
-		proxy_set_header Host services-casinogamessearch.{{ $environment }}-novibet.systems;
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
+		proxy_pass http://{{ $casinosearch }}/api/search/MOBILE/$1/$is_args$args;
+		proxy_set_header Host {{ $casinosearch }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location ~* ^\/betsearch\/(.*) {
-		proxy_pass http://web-novibet-desktop-api-{{$domain}}.{{ $environment }}-novibet.systems;
-		proxy_set_header Host web-novibet-desktop-api-{{$domain}}.{{ $environment }}-novibet.systems;
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
+		proxy_pass http://{{ $legacy_desktop }};
+		proxy_set_header Host {{ $legacy_desktop }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location ~* ^\/(media|dbmedia|pamedia)\/(.*) {
-		proxy_pass http://web-novibet-desktop-api-{{$domain}}.{{ $environment }}-novibet.systems;
-		proxy_set_header Host web-novibet-desktop-api-{{$domain}}.{{ $environment }}-novibet.systems;
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
+		proxy_pass http://{{ $legacy_desktop }};
+		proxy_set_header Host {{ $legacy_desktop }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location /mediaimages {
-		proxy_pass http://services-casinogames.{{ $environment }}-novibet.systems;
-		proxy_set_header Host services-casinogames.{{ $environment }}-novibet.systems;
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
+		proxy_pass http://{{ $casinogames_service }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
-	location ~* ^\/mrk\/(.*) {
-		proxy_pass http://services-marketinggateway.{{ $environment }}-novibet.systems/mrk/$1/$is_args$args;
+	location /mrk/api {
+		proxy_pass http://{{$mrk_gateway}};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 	
 	location ~* ^\/ngapi\/mobile\/(.*) {
-		proxy_pass http://web-novibet-mobile-api-{{$domain}}.{{$environment}}-novibet.systems/$1$is_args$args;
-		proxy_set_header Host web-novibet-mobile-api-{{$domain}}.{{$environment}}-novibet.systems;
+		proxy_pass http://{{ $legacy_mobile }}/$1$is_args$args;
+		proxy_set_header Host {{ $legacy_mobile }};
+
 		{{ if eq (index $oneDomain $domain) "false" }}
 		proxy_set_header X-Forwarded-Host m{{$domainKey}}.novibet.{{$domain}};
 		{{else}}
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		{{end}}
+		
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 		proxy_set_header NGApi NGApi;
     }
 
 	location ~* ^\/ngapi\/desktop\/(.*) {
-		proxy_pass http://web-novibet-desktop-api-{{$domain}}.{{$environment}}-novibet.systems/$1$is_args$args;
-		proxy_set_header Host web-novibet-desktop-api-{{$domain}}.{{$environment}}-novibet.systems;
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
+		proxy_pass http://{{ $legacy_desktop }}/$1$is_args$args;
+		proxy_set_header Host {{ $legacy_desktop }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 		proxy_set_header NGApi NGApi;
     }
 
 	location /signalr/desktop {
-		proxy_pass http://web-novibet-desktop-api-{{$domain}}.{{$environment}}-novibet.systems;
-		proxy_set_header Host web-novibet-desktop-api-{{$domain}}.{{$environment}}-novibet.systems;
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
+		proxy_pass http://{{ $legacy_desktop }};
+		proxy_set_header Host {{ $legacy_desktop }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
         proxy_set_header Upgrade $http_upgrade;
@@ -396,9 +413,8 @@ server {
 	}
 
 	location /signalr/mobile {
-		proxy_pass http://web-novibet-mobile-api-{{$domain}}.{{$environment}}-novibet.systems;
-		proxy_set_header Host web-novibet-mobile-api-{{$domain}}.{{$environment}}-novibet.systems;
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
+		proxy_pass http://{{ $legacy_mobile }};
+		proxy_set_header Host {{ $legacy_mobile }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
         proxy_set_header Upgrade $http_upgrade;
@@ -407,17 +423,17 @@ server {
 	}
 
 	location ~* ^\/ngapi\/(.*) {
-		proxy_pass http://web-novibet-desktop-api-{{$domain}}.{{ $environment }}-novibet.systems/$1$is_args$args;
-		proxy_set_header Host web-novibet-desktop-api-{{$domain}}.{{ $environment }}-novibet.systems;
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
+		proxy_pass http://{{ $backend }}/$1$is_args$args;
+		proxy_set_header Host {{ $backend }};
+		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 		proxy_set_header NGApi NGApi;
     }
 
 	location /signalr {
-		proxy_pass http://web-novibet-desktop-api-{{$domain}}.{{ $environment }}-novibet.systems;
-		proxy_set_header Host web-novibet-desktop-api-{{$domain}}.{{ $environment }}-novibet.systems;
+		proxy_pass http://{{ $backend }}/$1$is_args$args;
+		proxy_set_header Host {{ $backend }};
 		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
@@ -427,9 +443,7 @@ server {
 	}
 
 	location /spt/feed/signalr {
-		proxy_pass http://web-sportsbookfeed.{{ $environment }}-novibet.systems;
-		proxy_set_header Host web-sportsbookfeed.{{ $environment }}-novibet.systems;
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
+		proxy_pass http://{{$spt_gateway}};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
         proxy_set_header Upgrade $http_upgrade;
@@ -438,17 +452,13 @@ server {
 	}
 
 	location /spt/feed {
-		proxy_pass http://web-sportsbookfeed.{{ $environment }}-novibet.systems;
-		proxy_set_header Host web-sportsbookfeed.{{ $environment }}-novibet.systems;
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
+		proxy_pass http://{{$spt_gateway}};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
     }
 
 	location /spt/api {
-		proxy_pass http://web-sportsbookgateway.{{ $environment }}-novibet.systems;
-		proxy_set_header Host web-sportsbookgateway.{{ $environment }}-novibet.systems;
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
+		proxy_pass http://{{$spt_api}};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
     }
