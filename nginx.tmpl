@@ -329,7 +329,7 @@ server {
 		{{ else }}
 		add_header  X-Upstream-Environment   {{ $environment }};
 		add_header  X-Upstream-IP   {{ $forwarded_for }};
-		add_header  X-Upstream-Host   {{ $forwarded_host_mobile }};
+		add_header  X-Upstream-Host   {{ $forwarded_host }};
 		add_header  X-Upstream-Default   http://{{ $backend }}/;
 		add_header  X-Upstream-Legacy-Desktop   http://{{ $legacy_desktop }}/;
 		add_header  X-Upstream-Legacy-Mobile   http://{{ $legacy_mobile }}/;
