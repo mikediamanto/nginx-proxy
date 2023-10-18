@@ -206,6 +206,7 @@ upstream {{ $upstream_name }} {
 {{$_ := set $oneDomain "cl" "false"}}
 {{$_ := set $oneDomain "mx" "false"}}
 {{$_ := set $oneDomain "ec" "false"}}
+{{$_ := set $oneDomain "fi" "false"}}
 
 {{ $domains := dict }}
 {{ $_ := set $domains "prd" "" }}
@@ -223,6 +224,7 @@ upstream {{ $upstream_name }} {
 {{$_ := set $domainTemplates "cl" "www.%scl.novibet.com"}}
 {{$_ := set $domainTemplates "mx" "www.%snovibet.mx"}}
 {{$_ := set $domainTemplates "ec" "www.%sec.novibet.com"}}
+{{$_ := set $domainTemplates "fi" "www.%snovibet.fi"}}
 
 
 {{ $countryIps := dict }}
@@ -236,6 +238,7 @@ upstream {{ $upstream_name }} {
 {{$_ := set $countryIps "cl" "102.217.236.5"}}
 {{$_ := set $countryIps "mx" "104.238.40.5"}}
 {{$_ := set $countryIps "ec" "157.100.255.5"}}
+{{$_ := set $countryIps "fi" "109.163.208.0"}}
 
 
 {{ $environment := trim (or (first (groupByKeys $containers "Env.VIRTUAL_ENVIRONMENT")) "prd") }}
