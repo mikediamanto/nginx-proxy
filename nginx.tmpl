@@ -253,7 +253,7 @@ upstream {{ $upstream_name }} {
 {{ $legacy_desktop := trim (or (first (groupByKeys $containers "Env.VIRTUAL_LEGACY_DESKTOP"))  ( printf "web-novibet-desktop-api-%s.%s-novibet.systems" $domain $environment)) }}
 {{ $legacy_mobile := trim (or (first (groupByKeys $containers "Env.VIRTUAL_LEGACY_MOBILE"))  ( printf "web-novibet-mobile-api-%s.%s-novibet.systems" $domain $environment)) }}
 {{ $backend := trim (or (first (groupByKeys $containers "Env.VIRTUAL_BACKEND"))  ( printf "web-novibet-desktop-api-%s.%s-novibet.systems" $domain $environment)) }}
-{{ $mrk_gateway := trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) ( printf "services-marketinggateway.%s-novibet.systems" $environment)) }}
+{{ $mrk_gateway := trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) ( printf "web-marketinggateway.%s-novibet.systems" $environment)) }}
 {{ $spt_gateway := trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) ( printf "web-sportsbookfeed.%s-novibet.systems" $environment)) }}
 {{ $spt_api :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_API")) ( printf "web-sportsbookgateway.%s-novibet.systems" $environment)) }}
 {{ $casinogames_service :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINOGAMES_SERVICE")) (printf "services-casinogames.%s-novibet.systems" $environment)) }}
@@ -364,15 +364,11 @@ server {
 	location ~* ^\/betsearch/api/search/CT_(.*)_CasinoMobile {
 		proxy_pass http://{{ $casinosearch }}/api/search/MOBILE/$1/$is_args$args;
 		proxy_set_header Host {{ $casinosearch }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location ~* ^\/betsearch/api/search/CT_(.*)_casino {
 		proxy_pass http://{{ $casinosearch }}/api/search/MOBILE/$1/$is_args$args;
 		proxy_set_header Host {{ $casinosearch }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location ~* ^\/betsearch\/(.*) {
@@ -385,20 +381,14 @@ server {
 	location ~* ^\/(media|dbmedia|pamedia)\/(.*) {
 		proxy_pass http://{{ $legacy_desktop }};
 		proxy_set_header Host {{ $legacy_desktop }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location /mediaimages {
 		proxy_pass http://{{ $casinogames_service }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
 	}
 
 	location /mrk/api {
-		proxy_pass http://{{$mrk_gateway}};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
+		proxy_pass http://{{ $mrk_gateway }};
 	}
 	
 	location ~* ^\/ngapi\/mobile\/(.*) {
@@ -414,7 +404,7 @@ server {
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 		proxy_set_header NGApi NGApi;
-    }
+   }
 
 	location ~* ^\/ngapi\/desktop\/(.*) {
 		proxy_pass http://{{ $legacy_desktop }}/$1$is_args$args;
@@ -423,27 +413,27 @@ server {
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 		proxy_set_header NGApi NGApi;
-    }
+   }
 
 	location /signalr/desktop {
-		proxy_pass http://{{ $legacy_desktop }};
-		proxy_set_header Host {{ $legacy_desktop }};
-		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "Upgrade";
-        proxy_http_version 1.1;
+	   proxy_pass http://{{ $legacy_desktop }};
+	   proxy_set_header Host {{ $legacy_desktop }};
+	   proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
+	   proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+	   proxy_set_header X-Real-IP {{ $forwarded_for}};
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection "Upgrade";
+       proxy_http_version 1.1;
 	}
 
 	location /signalr/mobile {
-		proxy_pass http://{{ $legacy_mobile }};
-		proxy_set_header Host {{ $legacy_mobile }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "Upgrade";
-        proxy_http_version 1.1;
+	   proxy_pass http://{{ $legacy_mobile }};
+	   proxy_set_header Host {{ $legacy_mobile }};
+	   proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+	   proxy_set_header X-Real-IP {{ $forwarded_for}};
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection "Upgrade";
+       proxy_http_version 1.1;
 	}
 
 	location ~* ^\/ngapi\/(.*) {
@@ -453,7 +443,7 @@ server {
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 		proxy_set_header NGApi NGApi;
-    }
+   }
 
 	location /signalr {
 		proxy_pass http://{{ $backend }}/$1$is_args$args;
@@ -470,22 +460,22 @@ server {
 		proxy_pass http://{{$spt_gateway}};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "Upgrade";
-        proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "Upgrade";
+		proxy_http_version 1.1;
 	}
 
 	location /spt/feed {
 		proxy_pass http://{{$spt_gateway}};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
-    }
+   	}
 
 	location /spt/api {
 		proxy_pass http://{{$spt_api}};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
-    }
+   	}
 	
   {{ end }}
 }

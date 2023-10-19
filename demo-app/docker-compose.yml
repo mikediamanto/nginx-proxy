@@ -1,0 +1,18 @@
+version: '2'
+networks:
+  default:
+    external:
+      name: infrastructure-net
+
+services:
+  demo-app:
+    image: nexus-docker.dvo-novibet.systems/bluebrown-web/web-novibet-ie/develop_auto:latest
+    container_name: demo-app
+    expose:
+      - 4000
+    environment:
+      - VIRTUAL_PORT=4000
+      - VIRTUAL_HOST=web-novibet-ie.dev-app-02.local
+      - VIRTUAL_DOMAIN=ie
+      - VIRTUAL_ENVIRONMENT=stg
+      - HAS_PROXY=true
