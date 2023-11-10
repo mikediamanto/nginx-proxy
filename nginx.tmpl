@@ -241,12 +241,6 @@ upstream {{ $upstream_name }} {
 {{$_ := set $countryIps "fi" "109.163.208.0"}}
 
 
-{{ $mrkGatewayTemplate := dict }}
-{{$_ := set $mrkGatewayTemplate "devgr" "web-marketinggateway.%s-novibet.systems"}}
-{{$_ := set $mrkGatewayTemplate "stg" "web-marketinggateway.%s-novibet.systems"}}
-{{$_ := set $mrkGatewayTemplate "prd" "services-marketinggateway.%s-novibet.systems"}}
-
-
 {{ $environment := trim (or (first (groupByKeys $containers "Env.VIRTUAL_ENVIRONMENT")) "prd") }}
 {{ $domain := trim (or (first (groupByKeys $containers "Env.VIRTUAL_DOMAIN")) "gr") }}
 
@@ -259,7 +253,7 @@ upstream {{ $upstream_name }} {
 {{ $legacy_desktop := trim (or (first (groupByKeys $containers "Env.VIRTUAL_LEGACY_DESKTOP"))  ( printf "web-novibet-desktop-api-%s.%s-novibet.systems" $domain $environment)) }}
 {{ $legacy_mobile := trim (or (first (groupByKeys $containers "Env.VIRTUAL_LEGACY_MOBILE"))  ( printf "web-novibet-mobile-api-%s.%s-novibet.systems" $domain $environment)) }}
 {{ $backend := trim (or (first (groupByKeys $containers "Env.VIRTUAL_BACKEND"))  ( printf "web-novibet-desktop-api-%s.%s-novibet.systems" $domain $environment)) }}
-{{ $mrk_gateway := trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) ( printf (index $mrkGatewayTemplate $environment) $environment)) }}
+{{ $mrk_gateway := trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) ( printf web-marketinggateway.%s-novibet.systems $environment)) }}
 {{ $spt_gateway := trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) ( printf "web-sportsbookfeed.%s-novibet.systems" $environment)) }}
 {{ $spt_api :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_API")) ( printf "web-sportsbookgateway.%s-novibet.systems" $environment)) }}
 {{ $casinogames_service :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINOGAMES_SERVICE")) (printf "services-casinogames.%s-novibet.systems" $environment)) }}
