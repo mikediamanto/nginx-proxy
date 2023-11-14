@@ -261,6 +261,7 @@ upstream {{ $upstream_name }} {
 {{ $forwarded_host := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_HOST")) (printf $domainTemplate $domainKey)) }}
 {{ $forwarded_host_mobile := replace $forwarded_host "www" "m"  -1}}
 {{ $spt_search := trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_SEARCH")) (printf "services-betcontextsearch.%s-novibet.systems" $environment)) }}
+{{ $az_signalr := trim (or (first (groupByKeys $containers "Env.VIRTUAL_AZ_SIGNALR")) ("services-signalrhub.devgr-novibet.systems")) }}
 {{ $spt_betslip := trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_BETSLIP")) ("web-betslips.devgr-novibet.systems")) }}
 
 {{/* Get the SERVER_TOKENS defined by containers w/ the same vhost, falling back to "" */}}
@@ -342,6 +343,7 @@ server {
 		add_header  X-Upstream-Mrk-Gateway   http://{{ $mrk_gateway }}/;
 		add_header  X-Upstream-Casino-Search   http://{{ $casinosearch }}/;
 		add_header  X-Upstream-Casino-Games   http://{{ $casinogames_service }}/;
+		add_header  X-Upstream-Az-Signalr   http://{{ $az_signalr }}/;
 
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
@@ -417,6 +419,14 @@ server {
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 		proxy_set_header NGApi NGApi;
    }
+
+	location /accountnotificationshub {
+	   proxy_pass http://{{ $az_signalr }};
+	   proxy_set_header Host {{ $az_signalr }};
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection "Upgrade";
+       proxy_http_version 1.1;
+	}
 
 	location /signalr/desktop {
 	   proxy_pass http://{{ $legacy_desktop }};
