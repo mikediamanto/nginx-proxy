@@ -388,6 +388,7 @@ server {
 
 	location /mediaimages {
 		proxy_pass http://{{ $casinogames_service }};
+		proxy_set_header Host {{ $casinogames_service }};
 	}
 
 	location ~* ^\/mrk\/(.*) {
@@ -399,13 +400,7 @@ server {
 	location ~* ^\/ngapi\/mobile\/(.*) {
 		proxy_pass http://{{ $legacy_mobile }}/$1$is_args$args;
 		proxy_set_header Host {{ $legacy_mobile }};
-
-		{{ if eq (index $oneDomain $domain) "false" }}
-		proxy_set_header X-Forwarded-Host {{ $forwarded_host_mobile }};
-		{{else}}
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		{{end}}
-		
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
 		proxy_set_header NGApi NGApi;
