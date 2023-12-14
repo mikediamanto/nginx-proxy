@@ -256,6 +256,7 @@ upstream {{ $upstream_name }} {
 {{ $mrk_gateway := trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) ( printf "web-marketinggateway.%s-novibet.systems" $environment)) }}
 {{ $spt_gateway := trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) ( printf "web-sportsbookfeed.%s-novibet.systems" $environment)) }}
 {{ $spt_api :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_API")) ( printf "web-sportsbookgateway.%s-novibet.systems" $environment)) }}
+{{ $cas_gateway :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CAS_GATEWAY")) ( printf "web-casinogateway.%s-novibet.systems" $environment)) }}
 {{ $casinogames_service :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINOGAMES_SERVICE")) (printf "services-casinogames.%s-novibet.systems" $environment)) }}
 {{ $casinosearch :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINO_SEARCH")) (printf "services-casinogamessearch.%s-novibet.systems" $environment)) }}
 {{ $forwarded_host := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_HOST")) (printf $domainTemplate $domainKey)) }}
@@ -471,6 +472,12 @@ server {
 
 	location /spt/api {
 		proxy_pass http://{{$spt_api}};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
+   	}
+
+	location /cas {
+		proxy_pass http://{{$cas_gateway}};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
    	}
