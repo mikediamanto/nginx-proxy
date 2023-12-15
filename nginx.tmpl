@@ -476,7 +476,7 @@ server {
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
    	}
 
-	location /cas {
+	location /cas/ {
 		proxy_pass http://{{$cas_gateway}};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
