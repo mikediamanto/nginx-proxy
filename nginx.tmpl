@@ -482,7 +482,7 @@ server {
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
    	}
 
-	location /api/betslip {
+	location /spt/betslip {
 		proxy_pass http://{{$spt_betslip}};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
