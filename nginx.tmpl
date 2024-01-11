@@ -248,6 +248,7 @@ upstream {{ $upstream_name }} {
 {{ $forwarded_host := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_HOST")) (printf $domainTemplate $domainKey)) }}
 {{ $spt_search := trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_SEARCH")) (printf "services-betcontextsearch.%s-novibet.systems" $environment)) }}
 {{ $spt_betslip := trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_BETSLIP")) ("web-betslips.devgr-novibet.systems")) }}
+{{ $plt_signalr := trim (or (first (groupByKeys $containers "Env.VIRTUAL_PLT_SIGNALR")) ("services-signalrhub.devgr-novibet.systems")) }}
 
 {{/* Get the SERVER_TOKENS defined by containers w/ the same vhost, falling back to "" */}}
 {{ $server_tokens := trim (or (first (groupByKeys $containers "Env.SERVER_TOKENS")) "") }}
@@ -349,6 +350,12 @@ server {
 	}
 
   {{ if eq $hasProxy "true"}}
+
+	location /plt/signalrhub {
+		proxy_pass http://{{$plt_signalr}};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
+   	}
 
 	location ~* ^\/betsearch/api/search/CT_(.*)_CasinoMobile {
 		proxy_pass http://{{ $casinosearch }}/api/search/MOBILE/$1/$is_args$args;
@@ -456,14 +463,6 @@ server {
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
    	}
-
-	location /plt/signalrhub/customernotificationhub {
-		proxy_pass http://services-signalrhub.devgr-novibet.systems;
-		proxy_set_header Host services-signalrhub.devgr-novibet.systems;
-		proxy_set_header Upgrade $http_upgrade;
-		proxy_set_header Connection "Upgrade";
-		proxy_http_version 1.1;
-	}
 	
   {{ end }}
 }
