@@ -457,7 +457,7 @@ server {
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
    	}
 
-	location /plt/signalrhub {
+	location /plt/signalrhub/customernotificationhub {
 		proxy_pass http://services-signalrhub.devgr-novibet.systems;
 	}
 	
