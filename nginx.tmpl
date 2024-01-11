@@ -143,7 +143,6 @@ upstream {{ $upstream_name }} {
 	{{ $defaultPort := (when (eq (len $container.Addresses) 1) (first $container.Addresses) (dict "Port" "80")).Port }}
 	{{ $port := (coalesce $container.Env.VIRTUAL_PORT $defaultPort) }}
 	{{ $address := where $container.Addresses "Port" $port | first }}
-	#{{ $backend := (coalesce $container.Env.VIRTUAL_BACKEND "") }}
 	{{ if $debug }}
 	# Exposed ports: {{ $container.Addresses }}
 	# Default virtual port: {{ $defaultPort }}
@@ -195,18 +194,6 @@ upstream {{ $upstream_name }} {
 
 {{/* Get the VIRTUAL_PROTO defined by containers w/ the same vhost, falling back to "http" */}}
 {{ $proto := trim (or (first (groupByKeys $containers "Env.VIRTUAL_PROTO")) "http") }}
-{{ $oneDomain := dict}}
-{{$_ := set $oneDomain "ca" "true"}}
-{{$_ := set $oneDomain "com" "true"}}
-{{$_ := set $oneDomain "ie" "true"}}
-{{$_ := set $oneDomain "cy" "true"}}
-{{$_ := set $oneDomain "nz" "true"}}
-{{$_ := set $oneDomain "gr" "false"}}
-{{$_ := set $oneDomain "br" "false"}}
-{{$_ := set $oneDomain "cl" "false"}}
-{{$_ := set $oneDomain "mx" "false"}}
-{{$_ := set $oneDomain "ec" "false"}}
-{{$_ := set $oneDomain "fi" "false"}}
 
 {{ $domains := dict }}
 {{ $_ := set $domains "prd" "" }}
@@ -252,7 +239,6 @@ upstream {{ $upstream_name }} {
 
 {{ $legacy_desktop := trim (or (first (groupByKeys $containers "Env.VIRTUAL_LEGACY_DESKTOP"))  ( printf "web-novibet-desktop-api-%s.%s-novibet.systems" $domain $environment)) }}
 {{ $legacy_mobile := trim (or (first (groupByKeys $containers "Env.VIRTUAL_LEGACY_MOBILE"))  ( printf "web-novibet-mobile-api-%s.%s-novibet.systems" $domain $environment)) }}
-{{ $backend := trim (or (first (groupByKeys $containers "Env.VIRTUAL_BACKEND"))  ( printf "web-novibet-desktop-api-%s.%s-novibet.systems" $domain $environment)) }}
 {{ $mrk_gateway := trim (or (first (groupByKeys $containers "Env.VIRTUAL_MRK_GATEWAY")) ( printf "web-marketinggateway.%s-novibet.systems" $environment)) }}
 {{ $spt_gateway := trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_GATEWAY")) ( printf "web-sportsbookfeed.%s-novibet.systems" $environment)) }}
 {{ $spt_api :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_API")) ( printf "web-sportsbookgateway.%s-novibet.systems" $environment)) }}
@@ -260,7 +246,6 @@ upstream {{ $upstream_name }} {
 {{ $casinogames_service :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINOGAMES_SERVICE")) (printf "services-casinogames.%s-novibet.systems" $environment)) }}
 {{ $casinosearch :=trim (or (first (groupByKeys $containers "Env.VIRTUAL_CASINO_SEARCH")) (printf "services-casinogamessearch.%s-novibet.systems" $environment)) }}
 {{ $forwarded_host := trim (or (first (groupByKeys $containers "Env.VIRTUAL_FORWARDED_HOST")) (printf $domainTemplate $domainKey)) }}
-{{ $forwarded_host_mobile := replace $forwarded_host "www" "m"  -1}}
 {{ $spt_search := trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_SEARCH")) (printf "services-betcontextsearch.%s-novibet.systems" $environment)) }}
 {{ $spt_betslip := trim (or (first (groupByKeys $containers "Env.VIRTUAL_SPT_BETSLIP")) ("web-betslips.devgr-novibet.systems")) }}
 
@@ -333,12 +318,9 @@ server {
 		grpc_pass {{ trim $proto }}://{{ trim $upstream_name }};
 		{{ else }}
 
-		proxy_hide_header Cache-Control;
-		add_header Cache-Control  public,max-age=300 always;
 		add_header  X-Upstream-Environment   {{ $environment }};
 		add_header  X-Upstream-IP   {{ $forwarded_for }};
 		add_header  X-Upstream-Host   {{ $forwarded_host }};
-		add_header  X-Upstream-Default   http://{{ $backend }}/;
 		add_header  X-Upstream-Legacy-Desktop   http://{{ $legacy_desktop }}/;
 		add_header  X-Upstream-Legacy-Mobile   http://{{ $legacy_mobile }}/;
 		add_header  X-Upstream-Spt-Gateway   http://{{ $spt_gateway }}/;
@@ -350,11 +332,11 @@ server {
 		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
+		proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
+		{{ end }}
 
 		
 		
-		proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
-		{{ end }}
 		{{ if (exists (printf "/etc/nginx/htpasswd/%s" $host)) }}
 		auth_basic	"Restricted {{ $host }}";
 		auth_basic_user_file	{{ (printf "/etc/nginx/htpasswd/%s" $host) }};
@@ -442,26 +424,6 @@ server {
        proxy_http_version 1.1;
 	}
 
-	location ~* ^\/ngapi\/(.*) {
-		proxy_pass http://{{ $backend }}/$1$is_args$args;
-		proxy_set_header Host {{ $backend }};
-		proxy_set_header X-Forwarded-Host {{ $forwarded_host }};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-		proxy_set_header NGApi NGApi;
-   }
-
-	location /signalr {
-		proxy_pass http://{{ $backend }}/$1$is_args$args;
-		proxy_set_header Host {{ $backend }};
-		proxy_set_header X-Forwarded-Host www{{$domainKey}}.novibet.{{$domain}};
-		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
-		proxy_set_header X-Real-IP {{ $forwarded_for}};
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "Upgrade";
-        proxy_http_version 1.1;
-	}
-
 	location /spt/feed/signalr {
 		proxy_pass http://{{$spt_gateway}};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
@@ -494,6 +456,10 @@ server {
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
    	}
+
+	location /plt/signalrhub {
+		proxy_pass http://services-signalrhub.devgr-novibet.systems;
+	}
 	
   {{ end }}
 }
