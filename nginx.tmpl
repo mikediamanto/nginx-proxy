@@ -458,6 +458,15 @@ server {
 		proxy_set_header X-Real-IP {{ $forwarded_for}};
    	}
 
+    location /spt/betslips/signalr {
+		proxy_pass http://{{$spt_betslip}};
+		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
+		proxy_set_header X-Real-IP {{ $forwarded_for}};
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "Upgrade";
+		proxy_http_version 1.1;
+   	}
+
 	location /spt/betslips {
 		proxy_pass http://{{$spt_betslip}};
 		proxy_set_header X-Forwarded-For {{ $forwarded_for }};
